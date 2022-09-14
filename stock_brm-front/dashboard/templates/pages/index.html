@@ -8,40 +8,101 @@
 
 {% block content %}
 
-<script src="https://code.highcharts.com/stock/highstock.js"></script>
-<script src="https://code.highcharts.com/stock/modules/data.js"></script>
-<script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
-<script src="https://code.highcharts.com/stock/modules/export-data.js"></script>
-<script src="https://code.highcharts.com/stock/modules/accessibility.js"></script>
+<script src="{% static 'js/moment.min.js' %}"></script>
+<script src="{% static 'js/daterangepicker.min.js' %}"></script>
 
-<div id="container"></div>
-<input id="date" type="date">
-<input id="date" type="date">
-<select name="cars" id="cars">
-    <option value="volvo">USD - EUR</option>
-    <option value="saab">USD - BRL</option>
-    <option value="mercedes">USD - </option>
-</select>
+<script src="{% static 'js/stock/highstock.js' %}"></script>
+<script src="{% static 'js/stock/modules/data.js' %}"></script>
+<script src="{% static 'js/stock/modules/exporting.js' %}"></script>
+<script src="{% static 'js/stock/modules/export-data.js' %}"></script>
+<script src="{% static 'js/stock/modules/accessibility.js' %}"></script>
+
+<link rel="stylesheet" type="text/css" href="{% static 'css/daterangepicker.css' %}" />
+
+<div>
+  <div id="main-chart" class="main-chart"></div>
+</div>
+<div>
+  <select name="rate" id="rate">
+      <option value="BRL">USD - BRL</option>
+      <option value="EUR">USD - EUR</option>
+      <option value="JPN">USD - JPN</option>
+  </select>
+  <input type="text" name="daterange" value="" />
+<div>
 
 <script>
-    Highcharts.getJSON('https://demo-live-data.highcharts.com/aapl-c.json', function (data1) {
 
+  const data = JSON.parse('{{ data | escapejs }}');
+  const start = '{{ start }}';
+  const end = '{{ end }}';
 
-        const data = [[1600090200000, 115.36],[1600176600000, 115.54],[1600263000000, 112.13],[1600349400000, 110.34],[1600435800000, 106.84]];
-        Highcharts.stockChart('container', {
-            title: { text: 'AAPL Stock Price' },
-            scrollbar: { enabled: false },
-            navigator: { enabled: false },
-            credits: { enabled: false },
-            rangeSelector: { enabled: false },
-            scrollbar: { enabled: false },
-            navigator: { enabled: false },
-            series: [{
-                data: data,
-                tooltip: { valueDecimals: 2 }
-            }]
-        });
-    });
+  const ConfigChart = {
+    title: { text: '' },
+    scrollbar: { enabled: false },
+    navigator: { enabled: false },
+    credits: { enabled: false },
+    rangeSelector: { enabled: false },
+    scrollbar: { enabled: false },
+    navigator: { enabled: false },
+    tooltip: { 
+      useHTML: true,
+      formatter: function () {
+          date = ' <b>' + moment(this.x).format('DD/MM/YYYY') + '</b> '
+          time = ' <b>' + moment(this.x).format('hh:mm') + 'h</b> '
+          value = ' <b>' + this.y + '<b>'
+          return 'O valor em' + date + 'às' + time + 'foi ' + value;
+      } },
+    series: [{ data: data, name: 'USD-EUR', tooltip: { valueDecimals: 2 } }],
+    xAxis: { type: 'datetime', labels: { format: '{value: %d-%m-%Y}' } },
+  }
+
+  Highcharts.stockChart('main-chart', ConfigChart);
+
+  const configDatePicker = {
+    opens: 'left',
+    locale: {
+      format: "DD/MM/YYYY", 
+      separator: " até ", 
+      applyLabel: "Consultar",
+      cancelLabel: "Cancelar", 
+      fromLabel: "De", 
+      toLabel: "Para",
+      customRangeLabel: "Custom",
+      daysOfWeek: ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"],
+      monthNames: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", 
+        "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+      ],
+      firstDay: 1,
+    },
+    maxDate: end, 
+    startDate: start, 
+    endDate: end, 
+    minYear: 1990, 
+    maxSpan: { days: 5 },
+  }
+
+  const callbackDatePicker = function(d1, d2, label) {
+
+    const payload = {
+      'rate': $('select[name=rate] option').filter(':selected').val(),
+      'period': d1.format('DD-MM-YYYY') + '_' + d2.format('DD-MM-YYYY'),
+    }
+
+    $.ajax({
+        url: "/",
+        data : payload,
+        success : function(json) {
+            $("#request-access").hide();
+            console.log("requested access complete");
+        }
+    })
+  }
+
+  $(function() {
+    $('input[name="daterange"]').daterangepicker(configDatePicker, callbackDatePicker);
+  });
+
 </script>
 
 {% endblock %}
