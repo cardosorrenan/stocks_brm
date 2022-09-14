@@ -1,0 +1,47 @@
+{% extends 'pages/base.html' %}
+
+{% load static %}
+
+{% block title %}
+<title>Página Inicial</title>
+{% endblock %}
+
+{% block content %}
+
+<script src="https://code.highcharts.com/stock/highstock.js"></script>
+<script src="https://code.highcharts.com/stock/modules/data.js"></script>
+<script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/stock/modules/export-data.js"></script>
+<script src="https://code.highcharts.com/stock/modules/accessibility.js"></script>
+
+<div id="container"></div>
+<input id="date" type="date">
+<input id="date" type="date">
+<select name="cars" id="cars">
+    <option value="volvo">USD - EUR</option>
+    <option value="saab">USD - BRL</option>
+    <option value="mercedes">USD - </option>
+</select>
+
+<script>
+    Highcharts.getJSON('https://demo-live-data.highcharts.com/aapl-c.json', function (data1) {
+
+
+        const data = [[1600090200000, 115.36],[1600176600000, 115.54],[1600263000000, 112.13],[1600349400000, 110.34],[1600435800000, 106.84]];
+        Highcharts.stockChart('container', {
+            title: { text: 'AAPL Stock Price' },
+            scrollbar: { enabled: false },
+            navigator: { enabled: false },
+            credits: { enabled: false },
+            rangeSelector: { enabled: false },
+            scrollbar: { enabled: false },
+            navigator: { enabled: false },
+            series: [{
+                data: data,
+                tooltip: { valueDecimals: 2 }
+            }]
+        });
+    });
+</script>
+
+{% endblock %}
