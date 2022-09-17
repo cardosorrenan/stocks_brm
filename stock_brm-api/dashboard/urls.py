@@ -1,8 +1,8 @@
 from django.urls import path
 
-from dashboard.views import ChartRateUSD
+from dashboard.views import RateAPIView
 
 
 urlpatterns = [
-    path('chartrateusd', ChartRateUSD.as_view(), name='chart_rate_usd'),
+    path('rate', RateAPIView.as_view(), name='rate'),
 ]

@@ -1,59 +1,57 @@
 from datetime import datetime, timedelta, timezone
 
+
+from django.db.models import F
 from django.db import IntegrityError, transaction
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from dashboard.serializers import RateInputSerializer, RateOutputSerializer, CreateRateInputSerializer
 
-from dashboard.models import Currency, Date, RatesUSD
+from dashboard.models import Currency, Date, Rate
 from dashboard.services import VatComplyService
 
+service = VatComplyService()    
 
-class ChartRateUSD(APIView):
-    service = VatComplyService()        
+class RateAPIView(APIView):
     
+    def get(self, request):
+        query_params = request.query_params
+        serializer = RateInputSerializer(data=query_params)
+        serializer.is_valid(raise_exception=True)
+        start, end, curr_from, curr_to = serializer.validated_data.values()
+        results = Rate.objects.filter(date__date__gte=start,
+                                      date__date__lte=end, 
+                                      currency_to__short=curr_to,
+                                      currency_from__short=curr_from)
+        results_serializer = RateOutputSerializer(results, many=True)
+        response = { 'result': results_serializer.data }
+        return Response(response, 200)
+    
+
     def post(self, request):
-        start = request.data.get('start', None)
-        end = request.data.get('end', None)
+        payload = request.data
+        serializer = CreateRateInputSerializer(data=payload)
+        serializer.is_valid(raise_exception=True)
+        start, end, currency_from = serializer.validated_data.values()
         
-        if None in (start, end):
-            return Response({'message': 'The period needs to be provided.'}, 400)
-        
-        start = datetime.strptime(start, "%d-%m-%Y")
-        end = datetime.strptime(end, "%d-%m-%Y")
+        currencies = Currency.objects.all()
+        currency_from = currencies.get(short=currency_from)
+        currencies = currencies.exclude(short=currency_from.short)
         dates = [start + timedelta(days=x) for x in range(0, (end-start).days)]
         
-        if not dates:
-            return Response({'message': 'Max period = 5 days.'}, 400)
-    
-        if (dates[-1] - dates[0]).days > 4:
-            return Response({'message': ''}, 400)       
-
-        currencies = Currency.objects.exclude(short="USD")
-
         for date in dates:
-            date_client = datetime.strftime(date, "%Y-%m-%d")  
-                        
-            rates = self.service.get_rate_currency_usd(params={"date": date_client})
-            date_service = datetime \
-                .strptime(rates['result']['date'], "%Y-%m-%d") \
-                .replace(hour=14, minute=00, second=00, tzinfo=timezone.utc)
-            
+            date = datetime.strftime(date, "%Y-%m-%d")  
+            rates = service.get_rate({"date": date, "base": currency_from.short})
             try:
                 with transaction.atomic():
-                    if date_service.weekday() in [4, 5]:
-                        date_service = datetime \
-                            .strptime(date_client, "%Y-%m-%d") \
-                            .replace(hour=14, minute=00, second=00, tzinfo=timezone.utc)
-                    date_instance = Date(date=date_service)
-                    date_instance.save()
-                    for currency in currencies.iterator():                        
+                    date_instance = Date.objects.create(date=date)
+                    for currency in currencies.iterator():
                         short = currency.short
-                        rate = rates['result']['rates'][short]
-                        date_instance.date_currency_rate.add(
-                            currency, 
-                            through_defaults={'rate': rate})
+                        Rate.objects.create(date=date_instance,
+                                            currency_from=currency_from,
+                                            currency_to=currencies.get(short=short),
+                                            rate=rates['result']['rates'][short])
             except IntegrityError as error:
-                print(date_client, error)
-                
+                print(date, error)
+
         return Response({'message': 'Success'} , 201)
-        
