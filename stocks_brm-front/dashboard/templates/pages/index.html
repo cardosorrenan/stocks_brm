@@ -1,0 +1,147 @@
+{% extends 'pages/base.html' %}
+
+{% load static %}
+
+{% block title %}
+<title>Página Inicial</title>
+{% endblock %}
+
+{% block content %}
+
+<script src="{% static 'js/stock/highstock.js' %}"></script>
+<script src="{% static 'js/stock/modules/data.js' %}"></script>
+<script src="{% static 'js/stock/modules/exporting.js' %}"></script>
+<script src="{% static 'js/stock/modules/export-data.js' %}"></script>
+<script src="{% static 'js/stock/modules/accessibility.js' %}"></script>
+
+<script src="{% static 'js/daterangepicker.min.js' %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'css/daterangepicker.css' %}" />
+
+<div class="row">
+  <div class="col-4">
+    <div class="card mt-5">
+      <div class="card-header bg-dark">
+        <h5 class="text-light m-0 p-0">Panel</h5>
+      </div>
+      <div style="height: 450px" class="card-body">
+        <form id="submit" action="/dashboard/" method="POST" class="p-4">
+          {% csrf_token %}
+          <div class="form-group mb-4">
+            <label class="mb-1">
+              <b>From</b>
+            </label>
+            <select class="form-control" name="currency_from" id="currency_from">
+              <option value="USD">USD</option>
+            </select>
+          </div>
+          <div class="form-group mb-4">
+            <label class="mb-1">
+              <b>To</b>
+            </label>
+            <select class="form-control" name="currency_to" id="currency_to">
+              <option value="BRL">BRL</option>
+              <option value="EUR">EUR</option>
+              <option value="JPY">JPY</option>
+            </select>
+          </div>
+          <div class="form-group mb-5">
+            <label class="mb-1">
+              <b>Period</b>
+            </label>
+            <input class="form-control" type="text" name="daterange" value="" />
+          </div>
+          <div class="row">
+            <button id="submit" type="submit" class="btn btn-dark ml-auto">
+              <b>Get Result</b>
+            </button>
+          </div>
+        </form> 
+      </div>
+    </div>
+  </div>
+  <div class="col-8" style="height: 500px">
+    <div class="card mt-5">
+      <div class="card-header bg-dark">
+        <h5 class="text-light m-0 p-0">Result</h5>
+      </div>
+      <div style="height: 450px" class="card-body">
+        <div style="min-width: 700px;">
+        {%if rates %}
+          <div id="main-chart" class="main-chart"></div>
+        {% endif %}
+          <div 
+            id="loader"
+            style="display: flex;"
+            class="justify-content-center mt-5" 
+          >
+            <div class="spinner-grow spinner-grow-lg"></div>
+          </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const builderChart = (rates) => {
+    const chart = Highcharts.stockChart('main-chart', {
+      title: { text: '' },
+      scrollbar: { enabled: false },
+      navigator: { enabled: false },
+      credits: { enabled: false },
+      rangeSelector: { enabled: false },
+      scrollbar: { enabled: false },
+      navigator: { enabled: false },
+      tooltip: { 
+        useHTML: true,
+        formatter: function () {
+            date = ' <b>' + moment(this.x).format('DD/MM/YYYY') + '</b>'
+            value = ' <b>' + this.y + '<b>'
+            return date + ': ' + value;
+        } },
+      series: [{ data: rates, color: '#212529', tooltip: { valueDecimals: 2 } }],
+      xAxis: { type: false, labels: { format: '' } },
+    });
+  }
+
+  const builderDatePicker = (start, end) => {
+    let configDatePicker = {
+      opens: 'left',
+      locale: {
+        format: "DD/MM/YYYY", 
+        separator: "-", 
+        customRangeLabel: "Custom",
+        firstDay: 1,
+      },
+      maxDate: end, 
+      startDate: start, 
+      endDate: end, 
+      minYear: 1990, 
+      maxSpan: { days: 4 },
+      buttonClasses: "d-none"
+    }
+    $('input[name="daterange"]').daterangepicker(configDatePicker);
+  }
+  
+  let start = '{{ start }}';
+  let end = '{{ end  }}';
+  builderDatePicker(start, end);
+
+  let rates = '{{ rates }}';
+  if (rates != '[]') {
+    rates = JSON.parse(rates)
+    builderChart(rates)
+  }
+
+  $('#submit').submit(() => {
+    $("#loader").css("display", "flex")
+    $("#main-chart").css("display", "none")
+  });
+
+  $("#currency_to").val('{{ currency_to }}');
+  $("#currency_from").val('{{ currency_from }}');
+
+  $("#loader").css("display", "none")
+
+</script>
+
+{% endblock %}

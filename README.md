@@ -1,1 +1,1 @@
-stock_brm
+stocks_brm

@@ -1,0 +1,38 @@
+[
+  {
+    "model": "dashboard.currency",
+    "pk": 1,
+    "fields": {
+      "name": "US Dollar",
+      "symbol": "$",
+      "short": "USD"
+    }
+  },
+  {
+    "model": "dashboard.currency",
+    "pk": 2,
+    "fields": {
+      "name": "Euro",
+      "symbol": "€",
+      "short": "EUR"
+    }
+  },
+  {
+    "model": "dashboard.currency",
+    "pk": 3,
+    "fields": {
+      "name": "Brazilian Real",
+      "symbol": "R$",
+      "short": "BRL"
+    }
+  },
+  {
+    "model": "dashboard.currency",
+    "pk": 4,
+    "fields": {
+      "name": "Japanese Yen",
+      "symbol": "¥",
+      "short": "JPY"
+    }
+  }
+]
