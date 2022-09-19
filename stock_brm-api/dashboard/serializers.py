@@ -30,7 +30,8 @@ class RateOutputSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Rate
-        fields = ('rate', 'date')
+        fields = ('date', 'rate',)
+
         
     def to_representation(self, instance):
-        return (instance.rate, instance.date.get_iso(),)        
+        return (instance.date.get_iso(), instance.rate,)        
