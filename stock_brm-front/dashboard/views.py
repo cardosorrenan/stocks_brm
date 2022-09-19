@@ -1,51 +1,32 @@
-from queue import Empty
 from django.shortcuts import render
 from django.views.generic import TemplateView
 
-import datetime
+from dashboard.services import APIStockBRMService
+from dashboard.utils import CreateContext
 
-from dashboard.services import DashboardService
 
+service = APIStockBRMService()
 
-dashboard_service = DashboardService()
-
-# Create your views here.
 class IndexView(TemplateView):
     template_name = "pages/index.html"
     
     def get(self, request, *args, **kwargs):
-        TIME_GMT_REFRESH = 11
-   
-        if len(request.GET):
-            period = request.GET.get('date', '')
-            start, end = period.split('_')
-        else:    
-            end = datetime.datetime.today()
-            if (end.hour < TIME_GMT_REFRESH):
-                end = start - datetime.timedelta(days=1)
-            start = end - datetime.timedelta(days=5)
-        rate = 'BRL'
-        #params = {
-        #    rate: rate,
-        #    start: start,
-        #    end: end,
-        #}
-        #data = dashboard_service.get('/chart_rate', params)
-        data = {
-            "result": [
-                [1662732000, 115.36],
-                [1662818400, 115.54],
-                [1662904800, 112.13],
-                [1662991200, 110.34],
-                [1663077600, 106.84]
-            ]
+        context = CreateContext(request=request)
+        return render(request, self.template_name, context.get_context())
+    
+    def post(self, request, *args, **kwargs):
+        context = CreateContext(request=request)
+        start, end = context.get_formatted_date('%d-%m-%Y')
+        payload = {
+            'start': start,
+            'end': end,
+            'currency_from': request.POST.get('currency_from'),
         }
-        data = list(map(lambda d: [d[0]*1000 , d[1]], data['result']))
+        service.persist_rates(payload=payload)
         
-        context = dict()
-        context['start'] = start.strftime('%d/%m/%Y')
-        context['end'] = end.strftime('%d/%m/%Y')
-        context['data'] = data
-        return render(request, self.template_name, context)
-    
-    
+        query_params = {
+            **payload,
+            'currency_to': request.POST.get('currency_to'),
+        }
+        context.rates = service.get_rates(query_params=query_params)
+        return render(request, self.template_name, context.get_context())
