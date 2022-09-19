@@ -4,7 +4,7 @@ client = Client()
 
 
 class VatComplyService():
-    #DOMAIN_NAME = os.environ.get('DOMAIN_NAME_VATCOMPLY_SERVICE')
+    #DOMAIN_NAME = os.environ.get('DOMAIN_NAME_VATCOMPLY')
     DOMAIN_NAME = 'https://api.vatcomply.com'
     
     def get_rate(self, params={}):

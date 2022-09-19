@@ -1,6 +1,6 @@
 from django.db import models
 
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 class Currency(models.Model):
     name = models.CharField(max_length=128, 
@@ -51,6 +51,17 @@ class Date(models.Model):
     
     def get_iso(self):
         return int(self.date.timestamp() * 1000)
+    
+    @classmethod
+    def unknown_dates(self, start, end):
+        period = (end-start).days
+        dates_persist = [(start + timedelta(days=x)) for x in range(0, period)]
+        dates_persist_strf = [date.strftime("%Y-%m-%d") for date in dates_persist]
+        dates_found = Date.objects.filter(date__range=[start, end])
+        dates_found = list(dates_found.values_list('date', flat=True))
+        dates_found_strf = [date.strftime("%Y-%m-%d") for date in dates_found]
+        dates_unknown = set(dates_persist_strf) - set(dates_found_strf)
+        return list(dates_unknown)
 
 
 class Rate(models.Model):   
