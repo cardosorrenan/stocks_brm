@@ -1,11 +1,11 @@
 from django.shortcuts import render
 from django.views.generic import TemplateView
 
-from dashboard.services import APIStockBRMService
+from dashboard.services import APIStocksBRMService
 from dashboard.utils import CreateContext
 
 
-service = APIStockBRMService()
+service = APIStocksBRMService()
 
 class IndexView(TemplateView):
     template_name = "pages/index.html"

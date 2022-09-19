@@ -1,5 +1,5 @@
 """
-ASGI config for stock_brm-api project.
+ASGI config for stocks_brm-api project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 

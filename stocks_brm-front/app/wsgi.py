@@ -1,5 +1,5 @@
 """
-WSGI config for stock_brm-api project.
+WSGI config for stocks_brm-front project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
