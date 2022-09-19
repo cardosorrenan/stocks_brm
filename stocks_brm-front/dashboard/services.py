@@ -4,7 +4,7 @@ client = Client()
 
     
 class APIStocksBRMService:
-    DOMAIN_NAME = 'http://localhost:8005/api/dashboard'
+    DOMAIN_NAME = 'http://api:8005/api/dashboard'
         
     def get_rates(self, query_params={}):
         response = client.get(self.DOMAIN_NAME + '/rate', 

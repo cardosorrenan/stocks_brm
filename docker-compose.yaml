@@ -1,0 +1,67 @@
+version: "3.9"
+
+services:
+
+  db:
+    image: postgres:14-alpine
+    env_file: .env
+    container_name: ${POSTGRES_HOST}
+    hostname: ${POSTGRES_HOST}
+    volumes:
+      - data_db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+    ports:
+      - "5433:5432"
+    networks:
+      - stocksbrm-network
+
+  api:
+    build: ./stocks_brm-api/
+    container_name: api
+    env_file: .env
+    command: >
+      sh -c "python manage.py runserver 0.0.0.0:8005"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - ./stocks_brm-api/:/usr/src/app/
+    links:
+      - db:db
+    ports:
+      - "8005:8005"
+    networks:
+      - stocksbrm-network
+    depends_on:
+      - db
+    restart: on-failure
+
+  front:
+    build: ./stocks_brm-front/
+    container_name: front
+    command: >
+        sh -c "python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./stocks_brm-front/:/usr/src/app/
+    ports:
+      - "8000:8000"
+    links:
+      - api:api
+    networks:
+      - stocksbrm-network
+    depends_on:
+      - api
+    restart: on-failure
+
+volumes:
+  data_db:
+
+networks:
+  stocksbrm-network:
+    driver: bridge

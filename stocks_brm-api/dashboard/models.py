@@ -8,7 +8,7 @@ class Currency(models.Model):
                             blank=False, 
                             null=False, 
                             verbose_name='Name')
-    symbol = models.CharField(max_length=1,
+    symbol = models.CharField(max_length=3,
                               unique=True,
                               blank=False,
                               null=False,
