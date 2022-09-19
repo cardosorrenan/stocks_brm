@@ -16,17 +16,20 @@ class IndexView(TemplateView):
     
     def post(self, request, *args, **kwargs):
         context = CreateContext(request=request)
-        start, end = context.get_formatted_date('%d-%m-%Y')
-        payload = {
-            'start': start,
-            'end': end,
-            'currency_from': request.POST.get('currency_from'),
-        }
-        service.persist_rates(payload=payload)
-        
-        query_params = {
-            **payload,
-            'currency_to': request.POST.get('currency_to'),
-        }
-        context.rates = service.get_rates(query_params=query_params)
+        try:
+            start, end = context.get_formatted_date('%d-%m-%Y')
+            payload = {
+                'start': start,
+                'end': end,
+                'currency_from': request.POST.get('currency_from'),
+            }
+            service.persist_rates(payload=payload)
+            
+            query_params = {
+                **payload,
+                'currency_to': request.POST.get('currency_to'),
+            }
+            context.rates = service.get_rates(query_params=query_params)
+        except Exception as err:
+            print(err)
         return render(request, self.template_name, context.get_context())
