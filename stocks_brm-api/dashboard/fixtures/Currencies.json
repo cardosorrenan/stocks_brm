@@ -5,7 +5,8 @@
     "fields": {
       "name": "US Dollar",
       "symbol": "$",
-      "short": "USD"
+      "short": "USD",
+      "created_at": "2022-09-19 12:00:00"
     }
   },
   {
@@ -14,7 +15,8 @@
     "fields": {
       "name": "Euro",
       "symbol": "€",
-      "short": "EUR"
+      "short": "EUR",
+      "created_at": "2022-09-19 12:00:00"
     }
   },
   {
@@ -23,7 +25,8 @@
     "fields": {
       "name": "Brazilian Real",
       "symbol": "R$",
-      "short": "BRL"
+      "short": "BRL",
+      "created_at": "2022-09-19 12:00:00"
     }
   },
   {
@@ -32,7 +35,8 @@
     "fields": {
       "name": "Japanese Yen",
       "symbol": "¥",
-      "short": "JPY"
+      "short": "JPY",
+      "created_at": "2022-09-19 12:00:00"
     }
   }
 ]
