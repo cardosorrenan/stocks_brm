@@ -1,5 +1,9 @@
 # Stocks BRM
 
+<p align="center">
+  <img width="500" src="./readme/screen.png">
+</p>
+
 ### Get project
 ```
 git clone https://github.com/cardosorrenan/stocks_brm
@@ -35,3 +39,9 @@ http://localhost:8000/swagger/
 ```
 http://localhost:8005
 ```
+
+### Application Flow
+
+<p align="center">
+  <img width="700" src="./readme/flow.png">
+</p>
