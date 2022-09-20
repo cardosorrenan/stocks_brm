@@ -6,17 +6,17 @@ COMPOSE=docker-compose $(COMPOSE_OPTS)
 help:
 	@egrep "^# " [Mm]akefile
 
-# up:
-up:
+# start:
+start:
 	$(COMPOSE) up -d
 
 # build: 
 build:
-	$(COMPOSE) build --no-cache
+	$(COMPOSE) build
 
 # down:
 down:
-	$(COMPOSE) dowm
+	$(COMPOSE) down
 
 # stop:
 stop:
@@ -57,4 +57,21 @@ logs-front:
 logs-db:
 	$(COMPOSE) logs -f db
 
-	
+# test:
+test:
+	$(COMPOSE) exec api bash -c "pytest"
+
+# rerun-local:
+local-run:
+	python stocks_brm-api/manage.py runserver 0.0.0.0:8005
+
+# local-migrate
+local-migrate:
+	python stocks_brm-api/manage.py makemigrations
+	python stocks_brm-api/manage.py migrate
+
+# local-refresh:
+local-refresh:
+	python stocks_brm-api/manage.py flush
+	python stocks_brm-api/manage.py loaddata stocks_brm-api/dashboard/fixtures/*.json
+	python stocks_brm-api/manage.py runserver 0.0.0.0:8005

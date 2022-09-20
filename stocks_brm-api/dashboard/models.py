@@ -1,8 +1,20 @@
+
+
+import uuid
+
 from django.db import models
 
 from datetime import datetime, timezone, timedelta
 
-class Currency(models.Model):
+
+class BaseModel(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        abstract = True
+
+
+class Currency(BaseModel):
     name = models.CharField(max_length=128, 
                             unique=True, 
                             blank=False, 
@@ -27,7 +39,7 @@ class Currency(models.Model):
         return f'{self.name} ({self.short})'
 
 
-class Date(models.Model):
+class Date(BaseModel):
     date = models.DateTimeField(unique=True,
                                 blank=False,
                                 null=False,
@@ -64,7 +76,7 @@ class Date(models.Model):
         return list(dates_unknown)
 
 
-class Rate(models.Model):   
+class Rate(BaseModel):   
     date = models.ForeignKey(Date,
                              on_delete=models.PROTECT,
                              blank=False,
